@@ -1,9 +1,14 @@
 package com.policypulse.api;
 
+import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
-
+@CrossOrigin(origins = "http://localhost:5174")
 @RestController
 @RequestMapping("/api/policies")
 public class PolicyController {
@@ -15,19 +20,35 @@ public class PolicyController {
     }
 
     @GetMapping
-    public List<Policy> getAllPolicies() {
-        return policyService.getAllPolicies();
+    public Page<Policy> getAllPolicies(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return policyService.getAllPolicies(page, size);
     }
     @PostMapping
-    public Policy createPolicy(@RequestBody Policy policy) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public Policy createPolicy(@Valid @RequestBody Policy policy) {
         return policyService.createPolicy(policy);
     }
+
     @GetMapping("/{id}")
     public Policy getPolicyById(@PathVariable Long id) {
         return policyService.getPolicyById(id);
     }
     @PutMapping("/{id}")
-    public Policy updatePolicy(@PathVariable Long id, @RequestBody Policy policy) {
+    public Policy updatePolicy(@PathVariable Long id, @Valid @RequestBody Policy policy) {
         return policyService.updatePolicy(id, policy);
     }
+    @DeleteMapping("/{id}")
+    public void deletePolicy(@PathVariable Long id) {
+        policyService.deletePolicy(id);
+    }
+    @GetMapping("/search")
+    public Page<Policy> getPoliciesByStatus(
+            @RequestParam String status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return policyService.getPoliciesByStatus(status, page, size);
+    }
+
 }
