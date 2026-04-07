@@ -6,7 +6,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
+
+import java.io.IOException;
 import java.util.List;
 @CrossOrigin(origins = "http://localhost:5174")
 @RestController
@@ -49,6 +52,10 @@ public class PolicyController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         return policyService.getPoliciesByStatus(status, page, size);
+    }
+    @PostMapping("/{id}/document")
+    public Policy uploadPolicyDocument(@PathVariable Long id, @RequestParam("file") MultipartFile file) throws IOException {
+        return policyService.uploadPolicyDocument(id, file);
     }
 
 }

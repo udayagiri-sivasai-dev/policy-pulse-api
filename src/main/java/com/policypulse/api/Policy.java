@@ -18,6 +18,8 @@ public class Policy {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(name = "document_key")
+    private String documentKey;
 
     @NotBlank
     @Size(max = 50)
@@ -49,6 +51,13 @@ public class Policy {
 
     // getters/setters
     public Long getId() { return id; }
+    public String getDocumentKey() {
+        return documentKey;
+    }
+
+    public void setDocumentKey(String documentKey) {
+        this.documentKey = documentKey;
+    }
     public String getPolicyNumber() { return policyNumber; }
     public void setPolicyNumber(String policyNumber) { this.policyNumber = policyNumber; }
     public String getHolderName() { return holderName; }

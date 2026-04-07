@@ -6,6 +6,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.multipart.MultipartFile;
+import java.io.IOException;
 
 
 @Service
@@ -13,8 +15,11 @@ public class PolicyService {
 
     private final PolicyRepository policyRepository;
 
-    public PolicyService(PolicyRepository policyRepository) {
+    private final S3Service s3Service;
+
+    public PolicyService(PolicyRepository policyRepository, S3Service s3Service) {
         this.policyRepository = policyRepository;
+        this.s3Service = s3Service;
     }
     public Policy getPolicyById(Long id) {
         return policyRepository.findById(id)
@@ -45,5 +50,14 @@ public class PolicyService {
     }
     public Page<Policy> getPoliciesByStatus(String status, int page, int size) {
         return policyRepository.findByStatusIgnoreCase(status, PageRequest.of(page, size));
+    }
+    public Policy uploadPolicyDocument(Long id, MultipartFile file) throws IOException {
+        Policy policy = policyRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Policy not found: " + id));
+
+        String documentKey = s3Service.uploadFile(file);
+        policy.setDocumentKey(documentKey);
+
+        return policyRepository.save(policy);
     }
 }
