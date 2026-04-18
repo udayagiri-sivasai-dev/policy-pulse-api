@@ -16,10 +16,16 @@ public class PolicyService {
     private final PolicyRepository policyRepository;
 
     private final S3Service s3Service;
+    private final PolicyKafkaProducer policyKafkaProducer;
 
-    public PolicyService(PolicyRepository policyRepository, S3Service s3Service) {
+    public PolicyService(
+            PolicyRepository policyRepository,
+            S3Service s3Service,
+            PolicyKafkaProducer policyKafkaProducer
+    ) {
         this.policyRepository = policyRepository;
         this.s3Service = s3Service;
+        this.policyKafkaProducer = policyKafkaProducer;
     }
     public Policy getPolicyById(Long id) {
         return policyRepository.findById(id)
@@ -39,6 +45,7 @@ public class PolicyService {
 
         return policyRepository.save(existingPolicy);
     }
+
     public void deletePolicy(Long id) {
         Policy existingPolicy = policyRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Policy not found: " + id));
@@ -58,6 +65,28 @@ public class PolicyService {
         String documentKey = s3Service.uploadFile(file);
         policy.setDocumentKey(documentKey);
 
-        return policyRepository.save(policy);
+        Policy savedPolicy = policyRepository.save(policy);
+
+        policyKafkaProducer.publishDocumentUploaded(
+                new PolicyDocumentUploadedEvent(
+                        "DOCUMENT_UPLOADED",
+                        savedPolicy.getId(),
+                        savedPolicy.getPolicyNumber(),
+                        savedPolicy.getDocumentKey(),
+                        java.time.Instant.now().toString()
+                )
+        );
+
+        return savedPolicy;
+    }
+    public byte[] downloadPolicyDocument(Long id) {
+        Policy policy = policyRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Policy not found: " + id));
+
+        if (policy.getDocumentKey() == null || policy.getDocumentKey().isBlank()) {
+            throw new RuntimeException("No document found for policy: " + id);
+        }
+
+        return s3Service.downloadFile(policy.getDocumentKey());
     }
 }

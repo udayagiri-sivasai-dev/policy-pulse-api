@@ -2,7 +2,10 @@ package com.policypulse.api;
 
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -11,7 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
-@CrossOrigin(origins = "http://localhost:5174")
+@CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("/api/policies")
 public class PolicyController {
@@ -57,5 +60,14 @@ public class PolicyController {
     public Policy uploadPolicyDocument(@PathVariable Long id, @RequestParam("file") MultipartFile file) throws IOException {
         return policyService.uploadPolicyDocument(id, file);
     }
+    @GetMapping("/{id}/document")
+    public ResponseEntity<byte[]> downloadPolicyDocument(@PathVariable Long id) {
+        Policy policy = policyService.getPolicyById(id);
+        byte[] fileBytes = policyService.downloadPolicyDocument(id);
 
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + policy.getDocumentKey() + "\"")
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(fileBytes);
+    }
 }
