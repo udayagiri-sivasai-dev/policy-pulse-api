@@ -1,28 +1,39 @@
 # Policy Pulse API
 
-Spring Boot REST API for the **Policy Pulse** application. Provides backend endpoints consumed by the Policy Pulse UI (Vite + React). Includes a basic `/api/health` endpoint used to validate end-to-end connectivity.
-
-## Tech Stack
-- Java
-- Spring Boot
-- Maven
-- Embedded Tomcat
-- (Planned) PostgreSQL
+Policy Pulse API is a Spring Boot REST backend for managing insurance policy records and policy documents. It supports policy CRUD operations, pagination, status-based search, AWS S3 document upload/download, and Kafka event publishing after a document is uploaded.
 
 ## Features
-- **Health endpoint** for UI + monitoring checks:
-  - `GET /api/health` → `{ "status": "UP" }`
 
-## Prerequisites
-- Java 17+ (recommended)
-- Maven 3.8+
-- (Optional) PostgreSQL + pgAdmin (for future DB integration)
+- Create, read, update, and delete policy records
+- Paginated policy listing
+- Search policies by status
+- Upload policy documents to AWS S3
+- Download policy documents from AWS S3
+- Store only the S3 document key in the database
+- Publish a Kafka event when a policy document is uploaded
+- Validate request data using Jakarta Bean Validation
 
-## Run Locally
+## Tech Stack
 
-### Option 1: IntelliJ
-Run `PolicyPulseApiApplication.java`
+- Java
+- Spring Boot
+- Spring Web
+- Spring Data JPA
+- PostgreSQL
+- AWS S3 SDK
+- Apache Kafka
+- Maven
+- Flyway
 
-### Option 2: Terminal
-```bash
-mvn clean spring-boot:run
+## Project Structure
+
+```text
+src/main/java/com/policypulse/api
+├── Policy.java
+├── PolicyController.java
+├── PolicyRepository.java
+├── PolicyService.java
+├── S3Config.java
+├── S3Service.java
+├── PolicyDocumentUploadedEvent.java
+└── PolicyKafkaProducer.java
